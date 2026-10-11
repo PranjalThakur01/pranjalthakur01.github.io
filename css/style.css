@@ -1,3 +1,10 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
 html, body {
     overflow-x: hidden !important;
     width: 100%;
@@ -115,6 +122,14 @@ header nav a:hover {
     justify-content: center;
     align-items: center;
     font-size: 12px;
+}
+
+.cv-btn {
+    transition: transform 0.3s ease, background 0.3s ease !important;
+}
+
+.cv-btn:hover {
+    transform: scale(1.1) !important;
 }
 
 .resume-overlay {
@@ -1769,6 +1784,14 @@ header nav a:hover {
 }
 
 @media (max-width: 480px) {
+    /* Ultimate Mobile Scroll Lock (Right side gap fix) */
+    html, body {
+        overflow-x: hidden !important;
+        max-width: 100% !important; 
+        width: 100vw !important;
+        position: relative;
+    }
+
     /* Smooth Background Fade & Blur */
     canvas {
         transform: scale(1.15); /* Edges chhupane ke liye halka zoom */
@@ -1779,17 +1802,23 @@ header nav a:hover {
         mask-image: radial-gradient(ellipse 120% 80% at 50% 40%, rgba(0,0,0,1) 30%, rgba(0,0,0,0.5) 60%, rgba(0,0,0,0) 100%);
     }
 
-    /* Navbar Overflow Fix */
+    /* Navbar Spacing & Layout Fix */
     header nav {
-        gap: 0.4rem;
-        padding: 0.5rem 0.6rem;
-        flex-wrap: wrap; /* Agar screen chhoti hui toh links wrap ho jayenge */
-        width: 100%;
+        gap: 1rem; /* Links ke beech zyada gap */
+        padding: 0.8rem 1.2rem; /* Left/Right thodi zyada padding */
+        flex-wrap: wrap; 
+        justify-content: center;
+        width: 95%;
+        margin: 0 auto;
         border-radius: 15px;
     }
 
     header nav a {
-        font-size: 0.72rem;
+        font-size: 0.85rem; /* Text thoda clear kiya */
+    }
+
+    .cv-btn {
+        margin-left: 0.5rem;
     }
 
     .tech-circle {
@@ -1820,6 +1849,7 @@ header nav a:hover {
     .projects-heading { align-items: flex-start; }
     .project-card { min-height: 0; }
 }
+
 @media (prefers-reduced-motion: reduce) {
     .projects-track { scroll-behavior: auto; }
     .project-card { transition: none; }
