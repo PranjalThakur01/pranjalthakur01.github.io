@@ -1848,6 +1848,28 @@ header nav a:hover {
     .achievement-heading,
     .projects-heading { align-items: flex-start; }
     .project-card { min-height: 0; }
+
+
+    /* Strict Lock for Lower Sections (Highlights, Projects & Footer) */
+    .achievement-marquee, 
+    .projects-section {
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+    }
+
+    .site-footer {
+        width: 100% !important;
+        max-width: 100vw !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        left: 0 !important;
+        right: auto !important;
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+        box-sizing: border-box !important;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
