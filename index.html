@@ -38,11 +38,15 @@
             object-fit: cover;
             z-index: 0;
             pointer-events: none;
-            filter: brightness(0.76) saturate(0.58) contrast(0.97) blur(0.4px);
-            transform: scale(1.18) translate3d(-1.5%, 1.5%, 0);
+            filter: brightness(0.78) saturate(0.82) contrast(0.99) blur(0.4px);
+            transform: scale(1.08) translate3d(-1.5%, 1.5%, 0);
             box-shadow: inset 0 0 40px rgba(0,0,0,0.4), inset 38px 0 80px rgba(0,0,0,0.12), inset -38px 0 80px rgba(0,0,0,0.12), inset 0 -60px 80px rgba(0,0,0,0.45);
             -webkit-mask-image: radial-gradient(circle at center, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 93%, rgba(0,0,0,0) 100%);
             mask-image: radial-gradient(circle at center, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 78%, rgba(0,0,0,0.55) 93%, rgba(0,0,0,0) 100%);
+        }
+
+        .background-edge-fade {
+            display: none;
         }
 
         /* Scrollable Content Container */
@@ -1338,8 +1342,8 @@
         /* --- FLOATING CONTACT BUTTON --- */
         .floating-contact {
             position: fixed;
-            bottom: 88px;  /* Button ko ekdum bottom right me bhejne ke liye */
-            right: 95px;   
+            bottom: clamp(44px, 5.5vw, 52px);
+            right: clamp(66px, 5.5vw,72px);
             z-index: 100;
             display: flex;
             flex-direction: column; /* Button neeche, icons upar */
@@ -1523,13 +1527,23 @@
 
         /* --- MOBILE RESPONSIVE OVERRIDES --- */
         @media (max-width: 768px) {
-            canvas {
-                transform: translate3d(0, 0, 0) scale(1.08);
+            canvas#scroll-image {
+                transform: translate3d(0, 0, 0) scale(1);
                 object-fit: cover;
-                filter: brightness(0.76) saturate(0.58) contrast(0.97) blur(0.6px);
-                will-change: transform;
-                -webkit-mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.72) 2%, #000 8%, #000 92%, rgba(0,0,0,0.72) 98%, transparent 100%);
-                mask-image: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.72) 2%, #000 8%, #000 92%, rgba(0,0,0,0.72) 98%, transparent 100%);
+                filter: brightness(0.78) saturate(0.82) contrast(0.99) blur(0.6px);
+                -webkit-mask-image: none;
+                mask-image: none;
+            }
+
+            .background-edge-fade {
+                display: block;
+                position: fixed;
+                inset: 0;
+                z-index: 2;
+                pointer-events: none;
+                background:
+                    linear-gradient(90deg, #000 0%, rgba(0,0,0,0.82) 5%, rgba(0,0,0,0.38) 16%, transparent 30%, transparent 68%, rgba(0,0,0,0.38) 82%, rgba(0,0,0,0.82) 95%, #000 100%),
+                    linear-gradient(0deg, #000 0%, rgba(0,0,0,0.82) 6%, rgba(0,0,0,0.38) 20%, transparent 38%, transparent 80%, rgba(0,0,0,0.48) 100%);
             }
 
             main {
@@ -1806,8 +1820,8 @@
             }
 
             .floating-contact {
-                right: 55px;
-                bottom: 55px;
+                right: 48px;
+                bottom: 42px;
             }
 
             .tech-circle {
@@ -1832,13 +1846,12 @@
                 font-size: 0.78rem;
             }
 
-            canvas {
-                transform: translate3d(0, 0, 0) scale(1.08);
+            canvas#scroll-image {
+                transform: translate3d(0, 0, 0) scale(1);
                 transform-origin: center center;
                 object-position: center center;
                 object-fit: cover;
-                filter: brightness(0.76) saturate(0.58) contrast(0.97) blur(0.6px);
-                will-change: transform;
+                filter: brightness(0.78) saturate(0.82) contrast(0.99) blur(0.6px);
             }
 
             .tech-circle {
@@ -1878,6 +1891,7 @@
 </head>
 <body>
     <canvas id="scroll-image"></canvas>
+    <div class="background-edge-fade" aria-hidden="true"></div>
     
     <main>
         <header id="top">
@@ -2308,11 +2322,54 @@
             images.push(img);
         }
 
-        images[0].onload = () => {
-            canvas.width = images[0].width;
-            canvas.height = images[0].height;
-            context.drawImage(images[0], 0, 0);
-        };
+        let currentFrameIndex = 0;
+
+        function drawFrame(image) {
+            if (!image || !image.complete) return;
+
+            const isMobile = window.matchMedia("(max-width: 768px)").matches;
+            if (!isMobile) {
+                if (canvas.width !== image.width || canvas.height !== image.height) {
+                    canvas.width = image.width;
+                    canvas.height = image.height;
+                }
+                context.setTransform(1, 0, 0, 1, 0, 0);
+                context.drawImage(image, 0, 0);
+                return;
+            }
+
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+            const bitmapWidth = Math.round(viewportWidth * pixelRatio);
+            const bitmapHeight = Math.round(viewportHeight * pixelRatio);
+
+            if (canvas.width !== bitmapWidth || canvas.height !== bitmapHeight) {
+                canvas.width = bitmapWidth;
+                canvas.height = bitmapHeight;
+            }
+
+            context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+            const imageAspect = image.width / image.height;
+            const viewportAspect = viewportWidth / viewportHeight;
+            let sourceX = 0;
+            let sourceY = 0;
+            let sourceWidth = image.width;
+            let sourceHeight = image.height;
+
+            if (imageAspect > viewportAspect) {
+                sourceWidth = image.height * viewportAspect;
+                sourceX = (image.width - sourceWidth) / 2;
+            } else {
+                sourceHeight = image.width / viewportAspect;
+                sourceY = (image.height - sourceHeight) / 2;
+            }
+
+            context.drawImage(image, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, viewportWidth, viewportHeight);
+        }
+
+        images[0].onload = () => drawFrame(images[0]);
+        window.addEventListener("resize", () => drawFrame(images[currentFrameIndex]), { passive: true });
 
         const heroContent = document.querySelector('.hero-content');
         const heroRight = document.querySelector('.hero-right');
@@ -2343,31 +2400,18 @@ function updateHeroParallax() {
             
             requestAnimationFrame(() => {
                 updateImage(frameIndex);
-                updateMobileCanvas(scrollFraction);
             });
             updateHeroParallax();
         }, { passive: true });
 
-        function updateMobileCanvas(scrollFraction) {
-            if (!canvas) return;
-            if (window.matchMedia('(max-width: 768px)').matches) {
-                const progress = Math.max(0, Math.min(scrollFraction, 1));
-                const horizontalShift = progress * 1.5;
-                const zoom = 1.08 - progress * 0.04;
-                canvas.style.transform = `translate3d(-${horizontalShift}vw, 0, 0) scale(${zoom})`;
-                return;
-            }
-            canvas.style.transform = '';
-        }
-
         function updateImage(index) {
+            currentFrameIndex = index;
             if (images[index] && images[index].complete) {
-                context.drawImage(images[index], 0, 0);
+                drawFrame(images[index]);
             }
         }
 
         updateHeroParallax();
-        updateMobileCanvas(0);
 
         // 2. Phone Click Logic
         function toggleLinks(e) {
