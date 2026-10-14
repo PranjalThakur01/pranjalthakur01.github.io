@@ -6,7 +6,12 @@
     <title>Thakur's Portfolio</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        html { scroll-behavior: smooth; }
+        html {
+            scroll-behavior: smooth;
+            width: 100%;
+            overflow-x: clip !important;
+            overscroll-behavior-x: none;
+        }
 
         body {
             margin: 0;
@@ -14,6 +19,8 @@
             background-color: #000;
             font-family: 'Inter', sans-serif;
             color: #fff;
+            width: 100%;
+            max-width: 100%;
             overflow-x: clip !important;
             position: relative;
         }
